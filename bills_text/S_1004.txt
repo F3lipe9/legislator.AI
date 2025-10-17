@@ -1,0 +1,13 @@
+Bill: S.1004
+Title: An Act authorizing municipal use of the prudent investor standards.
+Sponsor: Brewer, Stephen M.
+General Court: 187th (2011 - 2012)
+Source: view_text
+URL: https://malegislature.gov/Bills/187/S1004/Senate/Bill/Text
+============================================================
+
+SECTION 1. : Section 54 of chapter 44 of the General Laws is hereby amended as follows:
+The current text of General Laws Chapter 44, Section 54, shall be subtitled “(a) General Rule:” and the following paragraph shall be added to said section 54 as follows:
+(b) Prudent Investor Rule
+This paragraph shall take effect in any city, town or district upon acceptance in accordance with the provisions of General Laws Chapter 4, Section 4. Upon acceptance of this paragraph any city, town, or district may manage trust funds held in its custody as a combined investment pool and may invest said funds in accordance with the provisions of the Massachusetts Prudent Investor Act (General Laws Chapter 203C) and not in accordance with paragraph (a) of this section.
+If any provision of this paragraph conflicts with the terms of a bequest, trust or other instrument that expresses the clear intent of the donor, then such funds may be managed and invested only in accordance with the terms of such bequest, trust or other instrument.

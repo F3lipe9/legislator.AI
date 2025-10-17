@@ -1,0 +1,20 @@
+Bill: S.344
+Title: An Act establishing a 0% interest program for the state revolving loan fund for water and sewer projects and establishing 3:1 leveraging for such pro...
+Sponsor: Creem, Cynthia Stone
+General Court: 187th (2011 - 2012)
+Source: view_text
+URL: https://malegislature.gov/Bills/187/S344/Senate/Bill/Text
+============================================================
+
+SECTION 1. Chapter 159 of the Acts of 2000 is hereby amended by striking out section 57, section 58, section 371 and section 372.
+SECTION 2.
+Chapter 29C of the General Laws as so appearing, is hereby amended by inserting after section 18 the following section: -
+Section 19.
+The water pollution abatement trust shall leverage funds in the trust for disbursement to finance projects authorized pursuant to this chapter on the basis of a three-to-one ratio.
+If in the opinion of the state treasurer, such increased leveraging is not feasible, the provisions of this section shall not apply.
+SECTION 3.
+Section 6 of Chapter 29C of the General Laws as so appearing, is hereby amended in the second paragraph by deleting the third sentence and inserting in place thereof the following sentence: -
+“Notwithstanding the forgoing but subject to the limit on contract assistance provided in this section, all permanent loans and other forms of financial assistance made by the trust to finance the costs of water pollution abatement projects on the departments intended use plan for calendar year 2012 and any subsequent calendar year shall provide for a subsidy or other assistance on the payment of debt service thereon such that such loans and other forms of financial assistance shall be the financial equivalent of a loan made at an interest equal to zero per cent.”
+SECTION 4.
+Subsection (g) of section 18 of said Chapter 29C of the General Laws as so appearing, is hereby amended by deleting the second sentence and inserting in place thereof the following sentence: -
+“Notwithstanding the forgoing but subject to the limit on contract assistance provided in this section, all permanent loans and other forms of financial assistance made by the trust to finance the costs of drinking water projects on the departments intended use plan for calendar year 2012 and any subsequent calendar year shall provide for a subsidy or other assistance on the payment of debt service thereon such that such loans and other forms of financial assistance shall be the financial equivalent of a loan made at an interest rate equal to zero per cent.”

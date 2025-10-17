@@ -1,0 +1,14 @@
+Bill: S.995
+Title: An Act requiring the parental notice of the treatment of minors for drug overdoses.
+Sponsor: Tolman, Steven A.
+General Court: 187th (2011 - 2012)
+Source: view_text
+URL: https://malegislature.gov/Bills/187/S995/Senate/Bill/Text
+============================================================
+
+SECTION 1. Section 12F of chapter 112 of the General Laws, as appearing in the 2004 Official Edition, is hereby amended by striking out, in lines 37 and 38, the words “minor or a proper judicial order” and inserting in place thereof the following words:- minor, a proper judicial order or in case of treatment for a drug overdose, as defined by department of public health regulation.
+SECTION 2. Said chapter 112, as so appearing, is hereby further amended by inserting after section 12F the following section:-
+Section 12F ½ . Any physician or hospital that treats a person 17 years of age or younger for a drug overdose, as defined by department of public health regulation, shall notify the minor’s parents or legal guardians of the overdose as part of the discharge planning process for the minor. The notification shall only be made in a meeting including the treating clinician and the minor’s parents or guardian. The treating clinician shall provide the parents or legal guardians with the current contact information for the bureau of substance abuse services within the department of public health and the substance abuse hotline operated by the department of public health.
+SECTION 3. The department of public health will design a pamphlet to be distributed in emergency rooms to parents or guardians of a person 17 years of age or younger who is treated for a non-fatal overdose. Said pamphlet shall include, but not be limited to: information on how treatment can help, information on what a parent can do to prevent future overdoses, and information on where the patient can go to get treatment.
+SECTION 4. Within 60 days of the effective date of this act, the department of public health shall promulgate a regulation defining the words “drug overdose”.
+SECTION 5. Sections 1, 2, and 3 shall take effect 90 days from passage.

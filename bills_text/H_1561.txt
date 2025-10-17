@@ -1,0 +1,26 @@
+Bill: H.1561
+Title: An Act to improve the ballistic database through microstamping ammunition.
+Sponsor: Linsky, David Paul
+General Court: 187th (2011 - 2012)
+Source: view_text
+URL: https://malegislature.gov/Bills/187/H1561/House/Bill/Text
+============================================================
+
+SECTION 1.   Chapter 269 of the General Laws, as appearing in the 2004 Official Edition, is hereby amended by deleting Section 11E  and inserting the following new section:-
+Chapter 269: Section 11E. Serial identification numbers on firearms.
+Section 11E.
+(A) All firearms, rifles and shotguns of new manufacture, manufactured or delivered to any licensed dealer within the commonwealth shall bear serial numbers permanently inscribed on a visible metal area of said firearm, rifle or shotgun, and the manufacturer of said firearm, rifle or shotgun shall keep records of said serial numbers and the dealer, distributor or person to whom the firearm, rifle or shotgun was sold or delivered.
+No licensed dealer shall order for delivery, cause to be delivered, offer for sale or sell within the commonwealth any newly manufactured firearm, rifle or shotgun received directly from a manufacturer, wholesaler or distributor not so inscribed with a serial number nor shall any licensed manufacturer or distributor of firearms, rifles or shotguns deliver or cause to be delivered within the commonwealth any firearm, rifle or shotgun not complying with this section.
+No licensed manufacturer within the commonwealth shall produce for sale within the United States, its territories or possessions any firearm, rifle or shotgun not complying with paragraph one of this section. Whoever violates this section shall be punished by a fine of five hundred dollars. Each such violation shall constitute a separate offense.
+(B) All semiautomatic firearms as defined in Chapter 140 Section 21 manufactured or delivered to any licensed dealer within the commonwealth shall be capable of microstamping ammunition.
+(C) For purposes of subparagraph (B), a firearm is capable of microstamping ammunition if –
+(i) a microscopic array of characters that identify the make, model, and serial number of the of the firearm is etched into the breech face and firing pin of the firearm; and
+(ii) when ammunition is fired from the firearm, the characters are copied from the breech face and firing pin onto the cartridge case of the ammunition.
+(D) Subparagraph (B) shall apply only to semiautomatic firearms which –
+(i) are manufactured, or imported into the Commonwealth on or after the effective date of this subsection; and
+(ii) have not been transferred to a person not licensed under Chapter 140 of the general laws.
+(D) Whoever violates paragraph (B) shall be fined an amount equal to –
+(i) in the case of a first such violation by the violator, $1,000 multiplied by the number of firearms involved in the violation;
+(ii) in the case of a second violation by the violator, $2,000 multiplied by the number of firearms involved in the violation;
+(iii) in the case of a third such violation by the violator, $3,000 multiplied by the number of firearms involved in the violation.
+(E) The effective date of this act shall be January 1, 2012.

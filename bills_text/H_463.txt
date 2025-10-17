@@ -1,0 +1,14 @@
+Bill: H.463
+Title: An Act requiring the inclusion of certain civil rights offense information in the statewide domestic violence recordkeeping system
+Sponsor: Linsky, David Paul
+General Court: 187th (2011 - 2012)
+Source: view_text
+URL: https://malegislature.gov/Bills/187/H463/House/Bill/Text
+============================================================
+
+SECTION 1. The commissioner of probation is hereby authorized and directed to include any injunction issued, whether a temporary, preliminary, permanent or final injunction, pursuant to sections 11H or section 11I of chapter 12, or section 127B of chapter 266, in the statewide domestic violence record keeping system created pursuant to St. 1992, c. 188 § 7.  Such information shall be made available to judges considering the issuance of any injunction pursuant to sections 11H or 12I of chapter 12, or section 127B of chapter 266.  Further, such information shall be made available to criminal justice agencies through the criminal justice information system maintained by the executive office of public safety.
+SECTION 2.  Section 11H of chapter 12 of the General Laws is hereby amended by inserting after the second sentence the following sentences:—
+Upon issuance of an injunction, whether a final injunctive order, or a temporary, preliminary, or permanent injunction, as provided in this section, the clerk shall transmit a certified copy of such order to the commissioner of probation for entry into the statewide domestic violence record keeping system.  The Attorney General shall transmit to the commissioner of probation a certified copy of each order obtained under this section that is in effect on the effective date of this amendment, for entry into the statewide domestic violence record keeping system.
+SECTION 3.  Section 11I of chapter 12 of the General Laws is hereby amended by inserting after the second sentence the following sentence:—
+Upon issuance of an injunction, whether a final injunctive order, or a temporary, preliminary, or permanent injunction, as provided in this section, the clerk shall transmit a certified copy of such order to the commissioner of probation for entry into the statewide domestic violence record keeping system.
+SECTION 4.  Section 127B of chapter 266 of the General Laws is hereby amended by inserting after the last sentence of the first paragraph, the following sentence: Upon issuance of an injunction, whether a final injunctive order, or a temporary, preliminary, or permanent injunction, as provided in this section, the clerk shall transmit a certified copy of such order to the commissioner of probation for entry into the statewide domestic violence record keeping system.
