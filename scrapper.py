@@ -20,7 +20,7 @@ class FinalMABillScraper:
         for page in range(start_page, end_page + 1):
             print(f"📄 Getting basic info from page {page}...")
             
-            url = f"https://malegislature.gov/Bills/Search?SearchTerms=&Page={page}&Refinements%5Blawsgeneralcourt%5D=3139347468202843757272656e7429%2C3139337264202832303233202d203230323429%2C3139326e64202832303231202d203230323229%2C3139317374202832303139202d203230323029%2C3139307468202832303137202d203230313829%2C3138397468202832303135202d203230313629%2C3138387468202832303133202d203230313429%2C3138377468202832303131202d203230313229"
+            url = f"https://malegislature.gov/Bills/Search?SearchTerms=&Page=1&Refinements%5Blawsgeneralcourt%5D=3139347468202843757272656e7429%2C3139337264202832303233202d203230323429%2C3139326e64202832303231202d203230323229"
             
             try:
                 response = self.session.get(url)
