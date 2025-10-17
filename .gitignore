@@ -1,0 +1,29 @@
+# Data files - don't commit scraped data
+data/states/massachusetts/raw/
+data/states/massachusetts/processed/text_files/
+data/states/massachusetts/progress_log.csv
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Debug files
+debug_*.html

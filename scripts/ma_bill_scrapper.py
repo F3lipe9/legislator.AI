@@ -82,8 +82,52 @@ class MABillScraper:
         
         return existing_text
 
+    def debug_page_content(self, page_number):
+        """Debug what's actually on the page"""
+        url = f"https://malegislature.gov/Bills/Search?SearchTerms=&Page={page_number}&Refinements%5Blawsgeneralcourt%5D=3139347468202843757272656e7429"
+        
+        print(f"🔍 DEBUG: Checking page {page_number}")
+        print(f"🔍 URL: {url}")
+        
+        try:
+            response = self.session.get(url)
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Save the page for inspection
+            with open(f"debug_page_{page_number}.html", 'w', encoding='utf-8') as f:
+                f.write(soup.prettify())
+            print(f"💾 Saved page content to debug_page_{page_number}.html")
+            
+            # Check for tables
+            tables = soup.find_all('table')
+            print(f"🔍 Found {len(tables)} tables")
+            
+            for i, table in enumerate(tables):
+                rows = table.find_all('tr')
+                print(f"🔍 Table {i}: {len(rows)} rows")
+                
+                # Show first few rows
+                for j, row in enumerate(rows[:3]):
+                    print(f"🔍 Row {j}: {len(row.find_all(['td', 'th']))} cells")
+                    if row.find('td'):
+                        cells = row.find_all('td')
+                        for k, cell in enumerate(cells):
+                            text = cell.get_text(strip=True)
+                            links = cell.find_all('a')
+                            print(f"🔍   Cell {k}: '{text[:50]}...' - {len(links)} links")
+            
+            # Check for bill links directly
+            bill_links = soup.find_all('a', href=lambda x: x and '/Bills/' in x)
+            print(f"🔍 Found {len(bill_links)} bill links")
+            
+            for link in bill_links[:5]:
+                print(f"🔍   Bill link: '{link.get_text(strip=True)}' -> {link['href']}")
+                
+        except Exception as e:
+            print(f"❌ Debug error: {e}")
+
     def scrape_basic_bill_info(self, start_page=1, end_page=2, skip_existing=True):
-        """Get basic bill information from search results"""
+        """Get basic bill information from search results - 194th ONLY"""
         all_bills = []
         
         # Get existing bills to skip duplicates
@@ -92,9 +136,9 @@ class MABillScraper:
             print(f"🔄 Found {len(existing_ids)} existing bills, skipping duplicates")
         
         for page in range(start_page, end_page + 1):
-            print(f"📄 Getting basic info from page {page}...")
+            print(f"📄 Getting basic info from page {page} (194th session only)...")
             
-            url = f"https://malegislature.gov/Bills/Search?SearchTerms=&Page={page}&Refinements%5Blawsgeneralcourt%5D=3139347468202843757272656e7429%2C3139337264202832303233202d203230323429%2C3139326e64202832303231202d203230323229"
+            url = f"https://malegislature.gov/Bills/Search?SearchTerms=&Page={page}&Refinements%5Blawsgeneralcourt%5D=3139347468202843757272656e7429"
             
             try:
                 response = self.session.get(url)
@@ -102,16 +146,19 @@ class MABillScraper:
                 
                 table = soup.find('table')
                 if not table:
+                    print("❌ No table found on page")
                     continue
                 
                 rows = table.find_all('tr')
-                data_rows = [row for row in rows if row.find('td')]
+                print(f"🔍 Found {len(rows)} total rows in table")
                 
+                # Process all rows and let extract_basic_info handle filtering
                 page_bills = []
                 new_bills_count = 0
                 skipped_bills_count = 0
+                error_count = 0
                 
-                for row in data_rows:
+                for i, row in enumerate(rows):
                     bill_data = self.extract_basic_info(row)
                     if bill_data:
                         # Check if we should scrape this bill
@@ -125,12 +172,14 @@ class MABillScraper:
                         page_bills.append(bill_data)
                         new_bills_count += 1
                         print(f"  ✅ {bill_data['number']}")
+                    else:
+                        error_count += 1
                 
                 all_bills.extend(page_bills)
                 # Save progress after each page
                 self.save_progress(page, len(page_bills))
                 
-                print(f"  📊 Page {page}: {new_bills_count} new bills, {skipped_bills_count} skipped")
+                print(f"  📊 Page {page}: {new_bills_count} new bills, {skipped_bills_count} skipped, {error_count} errors")
                 
                 # Stop if no new bills found on page
                 if new_bills_count == 0 and skipped_bills_count > 0:
@@ -143,38 +192,52 @@ class MABillScraper:
                 print(f"❌ Error on page {page}: {e}")
         
         return all_bills
-    
+
     def extract_basic_info(self, row):
         """Extract basic bill info from table row"""
         try:
+            # Skip header rows
+            if row.find('th'):
+                return None
+                
             cells = row.find_all('td')
-            if len(cells) < 5:
+            
+            if len(cells) < 4:
                 return None
             
             bill = {}
-            bill['general_court'] = cells[1].get_text(strip=True)
             
-            bill_link = cells[2].find('a', href=True)
+            # Cell 1: Bill number and link (index 1)
+            bill_link = cells[1].find('a', href=True)
             if bill_link:
-                bill['number'] = bill_link.get_text(strip=True)
-                bill['detail_url'] = self.base_url + bill_link['href']
+                bill_number = bill_link.get_text(strip=True)
+                if bill_number:  # Make sure it's not empty
+                    bill['number'] = bill_number
+                    bill['detail_url'] = self.base_url + bill_link['href']
+                else:
+                    return None
             else:
                 return None
             
-            sponsor_link = cells[3].find('a', href=True)
+            # Cell 2: Sponsor (index 2)
+            sponsor_link = cells[2].find('a', href=True)
             if sponsor_link:
                 bill['sponsor'] = sponsor_link.get_text(strip=True)
             
-            title_link = cells[4].find('a', href=True)
+            # Cell 3: Bill title (index 3)
+            title_link = cells[3].find('a', href=True)
             if title_link:
                 bill['title'] = title_link.get_text(strip=True)
+            
+            # Since we're filtering for 194th session only
+            bill['general_court'] = "194th (2023-2024)"
             
             return bill
             
         except Exception as e:
             print(f"⚠️ Error extracting basic info: {e}")
             return None
-    
+
     def save_bill_data(self, bill_data):
         """Save bill data to organized raw data folder"""
         try:
@@ -483,7 +546,7 @@ if __name__ == "__main__":
     
     # Get basic bill info (with duplicate detection)
     print("\nPhase 1: Getting basic bill information...")
-    bills = scraper.scrape_basic_bill_info(start_page=1, end_page=1147, skip_existing=True)
+    bills = scraper.scrape_basic_bill_info(start_page=3, end_page=80, skip_existing=True)
     
     if bills:
         print(f"\n✅ Found {len(bills)} new bills")
