@@ -1,26 +1,100 @@
-# final_working_scraper.py
+# scripts/ma_bill_scraper.py
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 import time
 import re
+import json
+import os
+from datetime import datetime
 
-class FinalMABillScraper:
+class MABillScraper:
     def __init__(self):
         self.base_url = "https://malegislature.gov"
         self.session = requests.Session()
         self.session.headers.update({
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         })
+        
+        # Set up data directories
+        self.data_dir = "data/states/massachusetts"
+        self.raw_dir = f"{self.data_dir}/raw"
+        self.processed_dir = f"{self.data_dir}/processed"
+        
+        # Create directories if they don't exist
+        os.makedirs(self.raw_dir, exist_ok=True)
+        os.makedirs(self.processed_dir, exist_ok=True)
+        os.makedirs(f"{self.processed_dir}/individual_bills", exist_ok=True)
+        os.makedirs(f"{self.processed_dir}/text_files", exist_ok=True)
     
-    def scrape_basic_bill_info(self, start_page=1, end_page=2):
+    def get_existing_bill_ids(self):
+        """Get set of all bill IDs that have already been scraped"""
+        existing_ids = set()
+        
+        if os.path.exists(self.raw_dir):
+            for filename in os.listdir(self.raw_dir):
+                if filename.endswith('.json'):
+                    # Extract bill ID from filename: "194th_H_2212.json" -> "H.2212"
+                    match = re.match(r'(\w+)_([HS][D_]?\d+)\.json', filename)
+                    if match:
+                        session, bill_num = match.groups()
+                        # Convert back to original format: "H_2212" -> "H.2212"
+                        bill_id = bill_num.replace('_', '.')
+                        existing_ids.add(bill_id)
+        
+        return existing_ids
+
+    def should_scrape_bill(self, bill_data):
+        """Check if we should scrape this bill (not already exists)"""
+        existing_ids = self.get_existing_bill_ids()
+        return bill_data['number'] not in existing_ids
+
+    def load_existing_bills(self):
+        """Load all existing bills from raw directory"""
+        existing_bills = []
+        
+        if os.path.exists(self.raw_dir):
+            for filename in os.listdir(self.raw_dir):
+                if filename.endswith('.json'):
+                    filepath = os.path.join(self.raw_dir, filename)
+                    try:
+                        with open(filepath, 'r', encoding='utf-8') as f:
+                            bill_data = json.load(f)
+                            existing_bills.append(bill_data)
+                    except Exception as e:
+                        print(f"⚠️ Error loading {filename}: {e}")
+        
+        return existing_bills
+
+    def get_existing_text_files(self):
+        """Get set of all bill IDs that already have text files"""
+        existing_text = set()
+        text_files_dir = f"{self.processed_dir}/text_files"
+        
+        if os.path.exists(text_files_dir):
+            for filename in os.listdir(text_files_dir):
+                if filename.endswith('.txt'):
+                    # Extract bill ID: "194th_H_2212.txt" -> "H_2212"
+                    match = re.match(r'\w+_([HS][D_]?\d+)\.txt', filename)
+                    if match:
+                        bill_id = match.group(1)  # "H_2212"
+                        existing_text.add(bill_id)
+        
+        return existing_text
+
+    def scrape_basic_bill_info(self, start_page=1, end_page=2, skip_existing=True):
         """Get basic bill information from search results"""
         all_bills = []
+        
+        # Get existing bills to skip duplicates
+        if skip_existing:
+            existing_ids = self.get_existing_bill_ids()
+            print(f"🔄 Found {len(existing_ids)} existing bills, skipping duplicates")
         
         for page in range(start_page, end_page + 1):
             print(f"📄 Getting basic info from page {page}...")
             
-            url = f"https://malegislature.gov/Bills/Search?SearchTerms=&Page=1&Refinements%5Blawsgeneralcourt%5D=3139347468202843757272656e7429%2C3139337264202832303233202d203230323429%2C3139326e64202832303231202d203230323229"
+            url = f"https://malegislature.gov/Bills/Search?SearchTerms=&Page={page}&Refinements%5Blawsgeneralcourt%5D=3139347468202843757272656e7429%2C3139337264202832303233202d203230323429%2C3139326e64202832303231202d203230323229"
             
             try:
                 response = self.session.get(url)
@@ -33,11 +107,35 @@ class FinalMABillScraper:
                 rows = table.find_all('tr')
                 data_rows = [row for row in rows if row.find('td')]
                 
+                page_bills = []
+                new_bills_count = 0
+                skipped_bills_count = 0
+                
                 for row in data_rows:
                     bill_data = self.extract_basic_info(row)
                     if bill_data:
-                        all_bills.append(bill_data)
+                        # Check if we should scrape this bill
+                        if skip_existing and not self.should_scrape_bill(bill_data):
+                            skipped_bills_count += 1
+                            print(f"  ⏭️  Skipping {bill_data['number']} (already exists)")
+                            continue
+                        
+                        # Save each bill immediately
+                        self.save_bill_data(bill_data)
+                        page_bills.append(bill_data)
+                        new_bills_count += 1
                         print(f"  ✅ {bill_data['number']}")
+                
+                all_bills.extend(page_bills)
+                # Save progress after each page
+                self.save_progress(page, len(page_bills))
+                
+                print(f"  📊 Page {page}: {new_bills_count} new bills, {skipped_bills_count} skipped")
+                
+                # Stop if no new bills found on page
+                if new_bills_count == 0 and skipped_bills_count > 0:
+                    print(f"💡 No new bills found on page {page}, you may have reached the end")
+                    break
                 
                 time.sleep(1)
                 
@@ -77,6 +175,47 @@ class FinalMABillScraper:
             print(f"⚠️ Error extracting basic info: {e}")
             return None
     
+    def save_bill_data(self, bill_data):
+        """Save bill data to organized raw data folder"""
+        try:
+            # Extract session from general_court field
+            session_match = re.search(r'(\d+)(?:st|nd|rd|th)', bill_data.get('general_court', ''))
+            session = session_match.group(0) if session_match else "unknown_session"
+            
+            bill_id = bill_data['number'].replace('.', '_')
+            filename = f"{self.raw_dir}/{session}_{bill_id}.json"
+            
+            # Add metadata
+            bill_data['metadata'] = {
+                'scraped_at': datetime.now().isoformat(),
+                'session': session,
+                'bill_id': f"MA_{session}_{bill_id}",
+                'data_version': '1.0'
+            }
+            
+            with open(filename, 'w', encoding='utf-8') as f:
+                json.dump(bill_data, f, indent=2, ensure_ascii=False)
+            
+            print(f"💾 Saved {bill_data['number']} to {filename}")
+            return filename
+            
+        except Exception as e:
+            print(f"❌ Error saving bill data: {e}")
+            return None
+
+    def save_progress(self, page, bills_count):
+        """Track scraping progress"""
+        progress_file = f"{self.data_dir}/progress_log.csv"
+        
+        # Create progress file if it doesn't exist
+        if not os.path.exists(progress_file):
+            with open(progress_file, 'w') as f:
+                f.write("timestamp,page,bills_scraped\n")
+        
+        # Log progress
+        with open(progress_file, 'a') as f:
+            f.write(f"{datetime.now()},{page},{bills_count}\n")
+    
     def get_bill_text_final(self, bill_info):
         """Get bill text using the exact links we found in debug"""
         print(f"  📖 Getting text for {bill_info['number']}...")
@@ -94,6 +233,7 @@ class FinalMABillScraper:
                     bill_info['full_text'] = text
                     bill_info['text_source'] = 'view_text'
                     bill_info['text_url'] = view_text_url
+                    bill_info['text_length'] = len(text)
                     print(f"    ✅ Got {len(text)} chars from View Text")
                     return bill_info
             
@@ -105,6 +245,7 @@ class FinalMABillScraper:
                     bill_info['full_text'] = text
                     bill_info['text_source'] = 'print_preview'
                     bill_info['text_url'] = print_url
+                    bill_info['text_length'] = len(text)
                     print(f"    ✅ Got {len(text)} chars from Print Preview")
                     return bill_info
             
@@ -114,6 +255,7 @@ class FinalMABillScraper:
                 bill_info['full_text'] = f"PDF available at: {pdf_url}"
                 bill_info['text_source'] = 'pdf'
                 bill_info['text_url'] = pdf_url
+                bill_info['text_length'] = 0
                 print(f"    📎 PDF available: {pdf_url}")
                 return bill_info
             
@@ -122,12 +264,15 @@ class FinalMABillScraper:
             if len(direct_text) > 500:
                 bill_info['full_text'] = direct_text
                 bill_info['text_source'] = 'direct_page'
+                bill_info['text_url'] = bill_info['detail_url']
+                bill_info['text_length'] = len(direct_text)
                 print(f"    ✅ Got {len(direct_text)} chars from direct page")
                 return bill_info
             
             # If all strategies fail
             bill_info['full_text'] = "Could not extract bill text"
             bill_info['text_source'] = 'failed'
+            bill_info['text_length'] = 0
             print(f"    ❌ Could not extract text")
             return bill_info
             
@@ -135,6 +280,7 @@ class FinalMABillScraper:
             print(f"    ❌ Error: {e}")
             bill_info['full_text'] = f"Error: {str(e)}"
             bill_info['text_source'] = 'error'
+            bill_info['text_length'] = 0
             return bill_info
     
     def find_text_link(self, soup, link_text):
@@ -217,18 +363,32 @@ class FinalMABillScraper:
         
         return text.strip()
     
-    def scrape_with_text(self, bills, sample_size=None):
-        """Get text for bills"""
+    def scrape_with_text(self, bills, sample_size=None, skip_existing=True):
+        """Get text for bills, skipping those that already have text"""
         if sample_size is None:
             sample_size = len(bills)
         
-        print(f"\n🔍 Getting text for {min(sample_size, len(bills))} bills...")
+        # Check for existing text files
+        if skip_existing:
+            existing_text_files = self.get_existing_text_files()
+            bills_to_process = []
+            for bill in bills[:sample_size]:
+                bill_id = f"{bill['number'].replace('.', '_')}"
+                if bill_id not in existing_text_files:
+                    bills_to_process.append(bill)
+                else:
+                    print(f"  ⏭️  Skipping {bill['number']} (text already exists)")
+            
+            print(f"🔍 Getting text for {len(bills_to_process)} bills (skipped {sample_size - len(bills_to_process)} with existing text)...")
+        else:
+            bills_to_process = bills[:sample_size]
+            print(f"🔍 Getting text for {len(bills_to_process)} bills...")
         
         results = []
         successful = 0
         
-        for i, bill in enumerate(bills[:sample_size]):
-            print(f"  {i+1}/{min(sample_size, len(bills))}: ", end="")
+        for i, bill in enumerate(bills_to_process):
+            print(f"  {i+1}/{len(bills_to_process)}: ", end="")
             bill_with_text = self.get_bill_text_final(bill)
             results.append(bill_with_text)
             
@@ -237,14 +397,18 @@ class FinalMABillScraper:
             
             time.sleep(1)  # Be respectful
         
-        print(f"\n📊 Text extraction results: {successful}/{min(sample_size, len(bills))} successful")
+        print(f"\n📊 Text extraction results: {successful}/{len(bills_to_process)} successful")
         return results
     
-    def save_results(self, bills, filename="ma_bills_final.csv"):
-        """Save results to CSV and individual files"""
+    def save_results(self, bills, filename=None):
+        """Save results to organized structure"""
         if not bills:
             print("No bills to save")
             return
+        
+        # Use default filename in processed directory
+        if filename is None:
+            filename = f"{self.processed_dir}/bills_metadata.csv"
         
         # Create CSV
         df = pd.DataFrame(bills)
@@ -258,13 +422,18 @@ class FinalMABillScraper:
         df.to_csv(filename, index=False, encoding='utf-8')
         print(f"💾 Saved {len(bills)} bills to {filename}")
         
-        # Save successful extractions to individual files
+        # Save successful extractions to organized text files
         successful_bills = [b for b in bills if b.get('full_text') and len(b.get('full_text', '')) > 1000]
         if successful_bills:
-            import os
-            os.makedirs('bills_text', exist_ok=True)
+            text_files_dir = f"{self.processed_dir}/text_files"
+            os.makedirs(text_files_dir, exist_ok=True)
+            
             for bill in successful_bills:
-                filename = f"bills_text/{bill['number'].replace('.', '_')}.txt"
+                # Extract session for better organization
+                session_match = re.search(r'(\d+)(?:st|nd|rd|th)', bill.get('general_court', ''))
+                session = session_match.group(0) if session_match else "unknown"
+                
+                filename = f"{text_files_dir}/{session}_{bill['number'].replace('.', '_')}.txt"
                 with open(filename, 'w', encoding='utf-8') as f:
                     f.write(f"Bill: {bill['number']}\n")
                     f.write(f"Title: {bill.get('title', '')}\n")
@@ -274,7 +443,7 @@ class FinalMABillScraper:
                     f.write(f"URL: {bill.get('text_url', bill.get('detail_url', ''))}\n")
                     f.write("="*60 + "\n\n")
                     f.write(bill['full_text'])
-            print(f"📁 Saved {len(successful_bills)} full text files to 'bills_text' folder")
+            print(f"📁 Saved {len(successful_bills)} full text files to '{text_files_dir}'")
         
         # Print summary
         self.print_summary(bills)
@@ -301,26 +470,37 @@ class FinalMABillScraper:
             for i, bill in enumerate(bills_with_text[:5]):
                 print(f"   {i+1}. {bill['number']} ({bill.get('text_source', 'unknown')}): {bill['title'][:70]}...")
 
-# Run the final scraper
+# Run the scraper
 if __name__ == "__main__":
-    print("🚀 FINAL MA Legislature Bill Scraper")
-    print("Using exact text links found in debug")
+    print("🚀 MA Legislature Bill Scraper - Smart Data Collection")
     print("=" * 70)
     
-    scraper = FinalMABillScraper()
+    scraper = MABillScraper()
     
-    # Get basic bill info
-    print("Phase 1: Getting basic bill information...")
-    bills = scraper.scrape_basic_bill_info(start_page=1, end_page=1147)
+    # Check what we already have
+    existing_bills = scraper.load_existing_bills()
+    print(f"📊 Currently have {len(existing_bills)} bills in database")
+    
+    # Get basic bill info (with duplicate detection)
+    print("\nPhase 1: Getting basic bill information...")
+    bills = scraper.scrape_basic_bill_info(start_page=1, end_page=1147, skip_existing=True)
     
     if bills:
-        print(f"\n✅ Found {len(bills)} bills")
+        print(f"\n✅ Found {len(bills)} new bills")
         
-        # Get text for all bills
+        # Get text for bills (with duplicate detection)
         print("\nPhase 2: Getting full bill text...")
-        bills_with_text = scraper.scrape_with_text(bills)
+        bills_with_text = scraper.scrape_with_text(bills, skip_existing=True)
         
         # Save results
         scraper.save_results(bills_with_text)
+        
+        print(f"\n🎉 Data organized in: {scraper.data_dir}")
+        print(f"   Raw bills: {scraper.raw_dir}/")
+        print(f"   Processed data: {scraper.processed_dir}/")
+        
+        # Final summary
+        all_bills_now = scraper.load_existing_bills()
+        print(f"📈 Total bills in database: {len(all_bills_now)}")
     else:
-        print("❌ No bills found")
+        print("❌ No new bills found")
